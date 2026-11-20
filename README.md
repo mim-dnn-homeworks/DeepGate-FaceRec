@@ -1,6 +1,6 @@
 # DeepGate-FaceRec
 
-**Deep Neural Networks — Homework Assignment: Face Recognition via Deep Metric & Embedding Learning**
+**Deep Neural Networks — Homework Assignment: Face Recognition via Deep Embedding Learning**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/badge/package%20manager-uv-8A2BE2.svg)](https://docs.astral.sh/uv/)
