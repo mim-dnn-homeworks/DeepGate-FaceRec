@@ -3,10 +3,6 @@
 This directory contains face dataset used for the **DeepGate-FaceRec** homework assignment.
 It is derived from the **Labeled Faces in the Wild (LFW)** benchmark, available on [Kaggle](https://www.kaggle.com/datasets/jessicali9530/lfw-dataset).
 
----
-
-## 1. Dataset Overview & Curation Logic
-
 In biometric metric learning and face verification, standard random image splitting causes **severe data leakage**.
 
 To prevent this, the dataset is strictly **identity-disjoint**:
@@ -19,23 +15,17 @@ The raw LFW corpus contains 5,749 identities, but the majority have only a singl
 
 ---
 
-## 2. Obtaining the Dataset
+## Obtaining the Dataset
 
 To download and prepare the dataset, run the following command from the main project folder:
 
 ```bash
-uv run python `scripts/download_data.py`
+uv run python scripts/download_data.py
 ```
 
 The script downloads a single ZIP archive (~45 MB) and extracts the identity-disjoint train/, val/, and test/ splits.
 
-Please confirm that the zip hash is
-
-```
-sha256:6bd700f9eebe5dad3561bcad79fd949b6db25b3759974faef16d54fe5f1cdefd
-```
-
-## 3. Directory Layout
+## Directory Layout
 
 The prepared dataset is organized under `data/split/` as follows:
 
@@ -72,9 +62,9 @@ data/
                 └── Impostor_PersonY_0001.jpg
 ```
 
-## 4. Dataset Limitations, Demographic Bias & Intended Use
+## Dataset Limitations
 
-- **Toy Dataset for Educational Use Only:** This curated subset is a small **toy dataset** intended strictly for learning deep metric learning, triplet mining, and threshold calibration (`SmartGate`). Models trained on this data are for coursework exercises only and must **not** be used in production biometric or access-control systems.
-- **Demographic Bias:** Because LFW was compiled from Western news photography in the early 2000s, it exhibits severe demographic skew. In particular, it is heavily biased toward **white individuals** (alongside male and older public figures).
-- **Fairness Implications:** Training face recognition models on demographically homogeneous datasets leads to degraded embedding separation and uneven error rates (FAR/FRR) across underrepresented racial, gender, and age groups.
-- **Balanced Alternatives & Further Reading:** For research and benchmarks specifically designed to address demographic skew in face datasets, see Kärkkäinen and Joo (WACV 2021), *[FairFace: Face Attribute Dataset for Balanced Race, Gender, and Age](https://openaccess.thecvf.com/content/WACV2021/papers/Karkkainen_FairFace_Face_Attribute_Dataset_for_Balanced_Race_Gender_and_Age_WACV_2021_paper.pdf)*.
+This curated subset is a small toy dataset intended strictly for this homework.
+Because LFW was compiled from Western news photography in the early 2000s, it exhibits severe demographic skew (e.g. towards white, male, older public figures).
+Training on it leads to uneven error rates across underrepresented groups.
+For research and benchmarks specifically designed to address demographic skew, see e.g. Kärkkäinen and Joo (WACV 2021), *[FairFace: Face Attribute Dataset for Balanced Race, Gender, and Age](https://openaccess.thecvf.com/content/WACV2021/papers/Karkkainen_FairFace_Face_Attribute_Dataset_for_Balanced_Race_Gender_and_Age_WACV_2021_paper.pdf)*.
