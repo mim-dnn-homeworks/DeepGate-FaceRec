@@ -1,6 +1,6 @@
-# DeepGate-FaceRec: Report Documentation & LaTeX Template
+# DeepGate-FaceRec: Report Documentation
 
-This directory contains the official LaTeX template for your **DeepGate-FaceRec** homework report. The layout is adapted from the Neural Information Processing Systems (NeurIPS) camera-ready format, configured specifically for academic coursework submissions.
+This directory contains the LaTeX template for your **DeepGate-FaceRec** homework report, adapted from the Neural Information Processing Systems (NeurIPS) camera-ready format.
 
 ---
 
@@ -21,10 +21,10 @@ docs/report/
 
 ## 2. Report Requirements & Guidelines
 
-- **Recommended Length:** 3 to 4 pages (excluding references section).
-- **Target Audience:** Write with academic rigor. State exact mathematical formulations, describe training hyperparameters, and support experimental conclusions with empirical metrics.
+- **Required Length:** 3 to 4 pages (excluding references section).
+- **Target Audience:** Write concisely and with academic rigor. State exact mathematical formulations, describe training hyperparameters, and support experimental conclusions with empirical metrics.
 - **Key Sections to Cover:**
-  1. **Introduction & Motivation:** Contrast softmax classification with metric embedding learning; formulate the open-set verification problem.
+  1. **Introduction & Motivation:** Contrast softmax classification with metric embedding learning; formulate the open-set verification problem and discuss the dataset.
   2. **Methodology:**
      - Pretrained vision backbone and $L_2$ hypersphere projection head.
      - Identity-aware batch sampling ($P \times K$ batch construction).

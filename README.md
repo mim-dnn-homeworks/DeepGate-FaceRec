@@ -25,7 +25,8 @@ To guide your implementation, the homework is organized into six progressive mil
 
 | Milestone | Topic | Description | Deliverables |
 |---|---|---|---|
-| **Part 1** | **Exploratory Data Analysis** | Investigate the provided dataset and measure its quality. | `notebooks/01_eda.ipynb` || **Part 2** | **Embedding Architecture** | Adapt a pretrained vision backbone (ResNet/MobileNet) with an embedding projection head and $L_2$ hypersphere normalization. | `src/models.py` |
+| **Part 1** | **Exploratory Data Analysis** | Investigate the provided dataset and assess its quality. | `notebooks/01_eda.ipynb`, `docs/main.pdf` |
+| **Part 2** | **Embedding Architecture** | Adapt a pretrained vision backbone (ResNet/MobileNet) with an embedding projection head and $L_2$ hypersphere normalization. | `src/models.py` |
 | **Part 3** | **Identity Batch Sampling** | Implement a $P \times K$ identity sampler (sample $P$ subjects, each with $K$ distinct face images) to enable informative in-batch comparisons. | `src/data.py` |
 | **Part 4** | **Online Triplet Mining** | Implement batch-hard and semi-hard negative mining strategies using pairwise distance matrices. | `src/mining.py` |
 | **Part 5** | **Triplet Loss from Scratch** | Implement vectorised Triplet Margin Loss: $\mathcal{L}(a, p, n) = \max\left(0, \|\mathbf{z}_a - \mathbf{z}_p\|_2^2 - \|\mathbf{z}_a - \mathbf{z}_n\|_2^2 + \alpha\right)$ without calling `torch.nn.TripletMarginLoss`. | `src/losses.py` |
@@ -34,7 +35,7 @@ To guide your implementation, the homework is organized into six progressive mil
 
 ---
 
-## Repository Structure
+## 2. Repository Structure
 
 ```text
 deepgate-facerec/
@@ -86,16 +87,16 @@ To ensure scientific rigor and clean software engineering habits, this project u
 
 <summary>Click here to learn more about uv</summary>
 
-### `uv` overview
 uv is an ultra-fast Python package and project manager built in Rust by Astral.
 It manages Python versions, creates a local .venv virtual environment, and resolves reproducible dependencies from `pyproject.toml`
 replacing `pip`, `venv`, `pip-tools`, and `pyenv` with a single tool.
 
-### Most important commands:
+#### Most important commands:
 
 ```bash
-# 1. Create `.venv` and install all runtime & dev dependencies from pyproject.toml
-uv sync
+# 1. Create `.venv` and install all runtime & dev dependencies declared in `pyproject.toml` and pinned for reproducibility in `uv.lock`.
+# This includes the `dev` dependency group by default (tools like `ruff`, `mypy`), while `--all-extras` installs optional runtime features.
+uv sync --all-extras
 
 # 2. Run commands, tests, or notebooks inside `.venv` (no manual activation required)
 uv run pytest
@@ -134,13 +135,12 @@ uv self update
 
 
 ### B. Fast Linting & Formatting: [`ruff`](https://docs.astral.sh/ruff/)
-* Google-style docstrings and [PEP 8](https://peps.python.org/pep-0008/) standards are enforced. Line length is set to **96 characters**.
+Google-style docstrings and [PEP 8](https://peps.python.org/pep-0008/) standards are enforced. Line length is set to **96 characters**.
 
 <details>
 
 <summary>Click here to learn more about Ruff</summary>
 
-#### What is Ruff?
 [Ruff](https://docs.astral.sh/ruff/) is an ultra-fast Python linter and code formatter written in Rust by Astral. It replaces multiple standalone tools—such as Flake8, Black, `isort`, `pydocstyle`, and `pyupgrade`—with a single binary configured directly in `pyproject.toml`.
 
 Enforcing Ruff ensures that all code across `src/` and `tests/` follows consistent formatting, clean import ordering, and safe Python idioms before your changes reach GitHub CI.
@@ -198,7 +198,7 @@ Public classes, and functions in `src/` require concise docstrings (relaxed in `
 5. **Line Length (`E501`):**
 Lines exceeding 96 characters are wrapped automatically by `uv run ruff format .`.
 
-### Documentation:
+#### Documentation:
 
 * [Ruff Overview](https://docs.astral.sh/ruff/)
 * [Getting Started Tutorial](https://docs.astral.sh/ruff/tutorial/)
@@ -216,14 +216,13 @@ Lines exceeding 96 characters are wrapped automatically by `uv run ruff format .
 
 
 ### C. Static Type Checking: [`mypy`](https://mypy-lang.org/)
-* Enforces type annotations across model inputs, loss functions, to catch mistakes early and to document interfaces concisely.
+Enforces type annotations across model inputs, loss functions, to catch mistakes early and to document interfaces concisely.
 
 <details>
 
 <summary>Click here to learn more about mypy</summary>
 
-#### What is Mypy?
-[Mypy](https://mypy.readthedocs.io/) is a static type checker for Python. Using [PEP 484](https://peps.python.org/pep-0484/) type annotations (such as `torch.Tensor`, `Path | None`, or `list[str]`), Mypy analyzes your code *without running it* to catch `None`-dereferences path types, and invalid return types before they fail at runtime or in GitHub CI.
+[Mypy](https://mypy.readthedocs.io/) is a static type checker for Python. Using [PEP 484](https://peps.python.org/pep-0484/) type annotations (such as `torch.Tensor`, `Path | None`, or `list[str]`), Mypy analyzes your code *without running it* to catch `None`-dereferences path types, and invalid return types, before they fail at runtime or in GitHub CI.
 
 #### Essential Commands
 
@@ -231,15 +230,11 @@ Lines exceeding 96 characters are wrapped automatically by `uv run ruff format .
 # 1. Type-check the entire `src/` package using settings in pyproject.toml
 uv run mypy src
 
-# 2. Type-check a single module while iterating
+# 2. Type-check a single module
 uv run mypy src/gate.py
 
-# 3. Run with strict type-checking flags enabled
-uv run mypy --strict src
-
-# 4. Show error codes (e.g., [union-attr], [arg-type]) to look up fixes
+# 3. Show error codes (e.g., [union-attr], [arg-type]) to look up fixes
 uv run mypy --show-error-codes src
-
 ```
 
 #### Examples of What Mypy Flags & How to Fix Them
@@ -271,7 +266,7 @@ def preprocess(img: Image.Image, transform: transforms.Compose) -> torch.Tensor:
 ```
 
 
-*Fix:* Narrow the type with `isinstance(...)` so Mypy can verify the return type:
+*Fix:* Narrow the type with `isinstance(...)` or `cast()`, so tell Mypy the type:
 ```python
 def preprocess(img: Image.Image, transform: transforms.Compose) -> torch.Tensor:
     tensor = transform(img)
@@ -350,20 +345,18 @@ import yaml
 
 
 ### D. Automated Quality Gate: [`pre-commit`](https://pre-commit.com/)
-* Automatically validates formatting, type contracts, and tests before any commit is finalized.
+Automatically validates formatting, type contracts, and tests before any commit is finalized.
 
 <details>
 
 <summary> Click here to learn more about pre-commit </summary>
-
-### `pre-commit` overview
 
 Git supports **hooks**—scripts that run automatically when certain Git events occur, such as right before a commit is recorded. [`pre-commit`](https://pre-commit.com/) is a framework that manages and runs these checks automatically in isolated environments so every contributor enforces the same quality standards without manual effort.
 
 Once enabled, **every `git commit` will run commands defined in `.pre-commit-config.yaml`, like `ruff format`**. If a check fails or auto-formats a file, the commit is paused so you can review and stage the fix—preventing style drift, broken configuration files, or accidental checkpoint uploads before they reach GitHub CI.
 
 
-### Checks supported within the current project
+#### Checks supported within the current project
 
 1. **File Hygiene & Large-File Guard (`pre-commit-hooks`):**
 * `trailing-whitespace` & `end-of-file-fixer`: Strips trailing spaces and ensures every file ends with a single newline.
@@ -377,7 +370,7 @@ Once enabled, **every `git commit` will run commands defined in `.pre-commit-con
 
 > **Workflow Tip:** When an auto-fixing hook (`ruff`, `ruff-format`, `trailing-whitespace`, or `end-of-file-fixer`) modifies a file during `git commit`, Git aborts the commit so you can inspect the diff. Stage the updated files (`git add -u`) and run `git commit` again.
 
-### Documentation:**
+#### Documentation:**
 
 * [pre-commit Official Guide](https://pre-commit.com/)
 * [Built-in File Hooks](https://github.com/pre-commit/pre-commit-hooks)
@@ -385,9 +378,8 @@ Once enabled, **every `git commit` will run commands defined in `.pre-commit-con
 
 </details>
 
----
 
-### F. Continuous Integration with GitHub Actions
+### E. Continuous Integration with GitHub Actions
 
 <details>
 
@@ -399,9 +391,7 @@ Once enabled, **every `git commit` will run commands defined in `.pre-commit-con
 
 This guarantees that every submission is tested in an identical, reproducible environment—catching formatting mistakes, type errors, or failing unit tests automatically and displaying green/red status checks directly on your commits and pull requests.
 
-### Where to Find Results
-
-#### 1. GitHub Actions CI Results (Linting, Type Checks & Tests)
+#### Where to Find CI Results (Linting, Type Checks & Tests)
 
 - **Actions Tab (Full Logs & Coverage):**
   1. Open your repository on GitHub and click the **Actions** tab in the top navigation bar.
@@ -440,8 +430,8 @@ uv run pytest --cov=src --cov-report=term-missing --cov-report=xml
 </details>
 
 
-### Prerequisites
-* **uv**: Install via Astral's official script:
+## 4. Local Setup
+1. **uv**: Install via [the official script](https://docs.astral.sh/uv/getting-started/installation/):
   ```bash
   # macOS / Linux
   curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -450,51 +440,32 @@ uv run pytest --cov=src --cov-report=term-missing --cov-report=xml
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   ```
 
-
-### Local Setup in 4 Commands
-
-1. **Clone the repository**:
+2. **Clone the repository**: clone your private fork in GitHub Classroom:
    ```bash
-   git clone https://github.com/adendek/DeepGate-FaceRec.git
-   cd DeepGate-FaceRec
+   git clone git@github.com:mim-dnn-homeworks/dnn-deepgate-facerec-USERNAME
+   cd dnn-deepgate-facerec-USERNAME
    ```
 
-2. **Sync the virtual environment and all dependencies**:
+3. **Sync the virtual environment and all dependencies**: (uses ~6 GB of disk space)
    ```bash
    uv sync --all-extras --group dev
    ```
 
-<details>
-
-<summary>Click here to learn more about uv sync </summary>
-
-* **Reproducible Environment:** Updates (or creates) the virtual environment in this folder (`.venv`) with this project's exact Python and dependency versions (declared in `pyproject.toml` and pinned for reproducibility in `uv.lock`).
-* **Included Groups:** `--all-extras` installs optional runtime features, and `--group dev` installs testing, linting, and notebook tools (`pytest`, `ruff`, `mypy`, `ipykernel`).
-* **Disk Space:** Uses ~6 GB of disk space for `.venv` (plus `uv`'s global cache).
-
-</details>
-
-3. **Install Git pre-commit hooks**:
+4. **Install Git pre-commit hooks**:
    ```bash
    uv run pre-commit install --install-hooks
    ```
 
-3. Run all checks manually across every file in the repository:
-```bash
-uv run pre-commit run --all-files
-```
+5. **Run all checks manually**:
+    ```bash
+    uv run pre-commit run --all-files
+    ```
 
 
-4. **Download and prepare the face dataset**:
+6. **Download and prepare the face dataset**:
    ```bash
-   uv run python data/download_data.py
+   uv run python scripts/download_data.py
    ```
-
-The expected zip hash:
-
-```
-sha256:6bd700f9eebe5dad3561bcad79fd949b6db25b3759974faef16d54fe5f1cdefd
-```
 
 ---
 
@@ -512,7 +483,7 @@ All commands must be executed using `uv run` to guarantee they run inside the is
 | **Format Code** | `uv run ruff format .` | Formats all files according to project style |
 | **Type Check** | `uv run mypy src/` | Runs strict static type validation |
 | **Run Pre-Commit** | `uv run pre-commit run --all-files` | Manually triggers all pre-commit hooks |
-| **Start Notebook** | `uv run jupyter lab` | Launches JupyterLab to run the visual demos |
+| **Start Notebook** | `uv run jupyter lab` | Launches JupyterLab locally to run the visual demos |
 
 ---
 
@@ -520,17 +491,17 @@ All commands must be executed using `uv run` to guarantee they run inside the is
 
 Alongside the working code, you must submit a concise, conference-style scientific report (3–4 pages). The report format is adapted from the NeurIPS conference style.
 
-### Direct Overleaf Template Link
 You can open and copy the official course report template directly in your browser:
 **[Open DeepGate-FaceRec Report Template on Overleaf](https://www.overleaf.com/project/6ae88d3923251984d11a96a5/share#2edcd42a0d900d6fa592d1db61885d531af4d654656f98ee)**
 
 *(Inside Overleaf, click **Menu** $\rightarrow$ **Copy Project** to create your own editable team copy).*
 
 ### Required Report Content
-1. **Mathematical Formulations**: State the exact loss formula, distance metric, and how gradients backpropagate through normalized embeddings.
-2. **Mining Analysis**: Empirical comparison between Random, Semi-Hard, and Batch-Hard mining (loss convergence, percentage of non-zero loss triplets).
-3. **Verification Performance**: ROC curve, AUC, Equal Error Rate (EER), and distance distribution histograms for positive vs. negative pairs.
-4. **Smart Gate Decision Trade-offs**: Analysis of False Acceptance Rate (FAR) vs. False Rejection Rate (FRR) as a function of the threshold $\tau$, explaining the security implications of choosing conservative vs. permissive thresholds.
+1. **Exploratory Data Analysis**.
+2. **Mathematical Formulations**: State the exact loss formula, distance metric, and how gradients backpropagate through normalized embeddings.
+3. **Mining Analysis**: Empirical comparison between Random, Semi-Hard, and Batch-Hard mining (loss convergence, percentage of non-zero loss triplets).
+4. **Verification Performance**: ROC curve, AUC, Equal Error Rate (EER), and distance distribution histograms for positive vs. negative pairs.
+5. **Smart Gate Decision Trade-offs**: Analysis of False Acceptance Rate (FAR) vs. False Rejection Rate (FRR) as a function of the threshold $\tau$, explaining the security implications of choosing conservative vs. permissive thresholds.
 
 See [`docs/report/README.md`](docs/report/README.md) for full compilation instructions, styling details, and formatting tips.
 
@@ -552,14 +523,12 @@ Your final submission consists of two deliverables:
 
 <div align="center">
 
-![Academic Integrity](https://img.shields.io/badge/ACADEMIC_INTEGRITY-NO_LLM_CODE_GENERATION-dc2626?style=for-the-badge)
-
 ### **Generative AI & LLM Usage Policy**
 
-**Using generative AI or LLMs to write assignment code is strictly forbidden.**
+Using generative AI or LLMs to write assignment code is strictly forbidden.
 
 **Permitted Exception (Plotting Boilerplate Only):**
-You may use LLMs to generate `matplotlib` / `seaborn` plotting and styling calls, provided that **all code preparing, filtering, or transforming the underlying data is written without AI**.
+You may use LLMs to generate `matplotlib` / `seaborn` plotting and styling calls, provided that all code preparing, filtering, or transforming the underlying data is written without AI.
 
 </div>
 
